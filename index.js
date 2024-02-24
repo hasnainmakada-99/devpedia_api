@@ -10,9 +10,7 @@ app.use(express.static("public"));
 const port = process.env.PORT || 3000;
 
 mongoose
-  .connect(
-    "mongodb+srv://hasnainmakada:hasnain123@cluster0.rgffboa.mongodb.net/?retryWrites=true&w=majority"
-  )
+  .connect(process.env.MONGODB_URL)
   .then(() => {
     console.log("Connected to MongoDB");
   })
@@ -35,7 +33,7 @@ app.post("/api/post-resources", async (req, res) => {
   try {
     const formData = req.body;
     console.log(formData);
-    const resource =  new Resources(formData);
+    const resource = new Resources(formData);
     await resource.save();
     res.json({ message: "Your Resource has been posted successfully" });
   } catch (error) {
