@@ -76,7 +76,11 @@ app.post("/api/login", async (req, res) => {
     const { email, password } = req.body;
     const user = await User.findOne({ email, password });
     if (user) {
+      res.setHeader('Cache-Control', 'no-store'); // Disable caching
       res.sendFile(__dirname + "/public/resource_fill.html");
+      res.setHeader('Pragma', 'no-cache'); // Disable caching
+      res.setHeader('Expires', '0'); // Disable caching
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate'); // Disable caching
     } else {
       res.status(401).send("Invalid credentials.");
     }
