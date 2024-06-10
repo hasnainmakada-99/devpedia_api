@@ -1,20 +1,9 @@
-/** Fields which will be included inside the Youtube Resources API
- * Resource Title name
- * Resource URL
- * Resource Description
- * Resource Thumbnail link
- * Resource Published Date
- * Resource Channel Name
- * Of which tool this resource is related to
- */
-
 const express = require("express");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const app = express();
 
 app.use(bodyParser.urlencoded({ extended: true }));
-
 app.use(express.static("public"));
 
 app.get("/", (req, res) => {
@@ -33,6 +22,7 @@ mongoose
   .catch((err) => {
     console.error("Error connecting to MongoDB:", err);
   });
+
 const resourceSchema = new mongoose.Schema({
   title: String,
   url: String,
@@ -41,9 +31,10 @@ const resourceSchema = new mongoose.Schema({
   publishedDate: String,
   channelName: String,
   toolRelatedTo: String,
+  price: String,
 });
 
-const Resources = mongoose.model("Resource", resourceSchema);
+const Resource = mongoose.model("Resource", resourceSchema);
 
 const userSchema = new mongoose.Schema({
   email: String,
@@ -57,13 +48,11 @@ app.post("/api/register", async (req, res) => {
     const password = req.body.password.trim().toLowerCase();
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      
       res.send("<script>alert('User already registered.');</script>");
     } else {
       const user = new User({ email, password });
       await user.save();
       res.json({ message: "User registered successfully" });
-      res.sendFile(__dirname + "/public/resource_fill.html");
     }
   } catch (error) {
     console.error(error);
@@ -76,11 +65,11 @@ app.post("/api/login", async (req, res) => {
     const { email, password } = req.body;
     const user = await User.findOne({ email, password });
     if (user) {
-      res.setHeader('Cache-Control', 'no-store'); // Disable caching
+      res.setHeader("Cache-Control", "no-store"); // Disable caching
       res.sendFile(__dirname + "/public/resource_fill.html");
-      res.setHeader('Pragma', 'no-cache'); // Disable caching
-      res.setHeader('Expires', '0'); // Disable caching
-      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate'); // Disable caching
+      res.setHeader("Pragma", "no-cache"); // Disable caching
+      res.setHeader("Expires", "0"); // Disable caching
+      res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); // Disable caching
     } else {
       res.status(401).send("Invalid credentials.");
     }
@@ -93,15 +82,16 @@ app.post("/api/login", async (req, res) => {
 app.post("/api/post-resources", async (req, res) => {
   try {
     const formData = req.body;
-    console.log(formData);
-    
+
+    formData.toolRelatedTo =
+      formData.toolRelatedTo.charAt(0).toUpperCase() +
+      formData.toolRelatedTo.slice(1);
+
     const user = await User.findOne({ email: req.body.email });
-    if (user) {
-      await resource.save();
-      res.json({ message: "Your Resource has been posted successfully" });
-    } else {
-      res.status(401).send("Unauthorized");
-    }
+
+    const resource = new Resource(formData);
+    await resource.save();
+    res.json({ message: "Your Resource has been posted successfully" });
   } catch (error) {
     console.error(error);
     res.status(500).send("Error saving resource.");
@@ -110,7 +100,7 @@ app.post("/api/post-resources", async (req, res) => {
 
 app.get("/api/get-resources", async (req, res) => {
   try {
-    const resources = await Resources.find(); // This method will retrieve all the reosurces from the mongodb database
+    const resources = await Resource.find();
     res.json(resources);
   } catch (error) {
     console.error(error);
@@ -118,11 +108,15 @@ app.get("/api/get-resources", async (req, res) => {
   }
 });
 
-app.post('/api/logout', (req, res) => {
-  
+app.post("/api/logout", (req, res) => {
+  req.session.destroy((err) => {
+    if (err) {
+      return res.status(500).send("Error logging out.");
+    }
+    res.send("Logged out successfully");
+  });
 });
 
-
-app.listen(port, (req, res) => {
-  console.log(`Server Started at Port ${3000}`);
+app.listen(port, () => {
+  console.log(`Server started at port ${port}`);
 });
