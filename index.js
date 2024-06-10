@@ -131,14 +131,14 @@ const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static("public"));
 
-app.use(
-  session({
-    secret: "yourSecretKey", // Replace with a strong secret key
-    resave: false,
-    saveUninitialized: true,
-    cookie: { maxAge: 60000 }, // 1 minute for example
-  })
-);
+// app.use(
+//   session({
+//     secret: "heis", // Replace with a strong secret key
+//     resave: false,
+//     saveUninitialized: true,
+//     cookie: { maxAge: 60000 }, // 1 minute for example
+//   })
+// );
 
 app.get("/", (req, res) => {
   res.sendFile(__dirname + "/public/login.html");
