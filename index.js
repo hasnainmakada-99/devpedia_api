@@ -243,7 +243,7 @@ app.post("/api/post-resources", requireAuth, async (req, res) => {
   }
 });
 
-app.get("/api/get-resources", requireAuth, async (req, res) => {
+app.get("/api/get-resources", async (req, res) => {
   try {
     const resources = await Resource.find();
     res.json(resources);
