@@ -226,7 +226,7 @@ app.get("/resource_fill", requireAuth, (req, res) => {
   res.sendFile(__dirname + "/public/resource_fill.html");
 });
 
-app.post("/api/post-resources", requireAuth, async (req, res) => {
+app.post("/api/post-resources",  async (req, res) => {
   try {
     const formData = req.body;
 
